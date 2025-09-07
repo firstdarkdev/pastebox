@@ -1,0 +1,9 @@
+services:
+  pastebox:
+    image: ghcr.io/firstdarkdev/pastebox:latest
+    restart: always
+    ports:
+      - 8787:8787
+    volumes:
+      - ./data:/app/data
+      - config.json:/app/config.json:ro
