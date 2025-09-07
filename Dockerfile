@@ -1,4 +1,4 @@
-FROM node:18 AS frontend
+FROM node:20 AS frontend
 WORKDIR /app
 COPY frontend/ .
 RUN npm install && npm run build
