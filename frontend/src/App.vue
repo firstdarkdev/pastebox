@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import {computed, nextTick, onMounted, ref} from "vue";
+import {computed, nextTick, ref} from "vue";
 import hljs from "highlight.js";
 import "highlight.js/styles/atom-one-dark.css";
+import MarkdownIt from "markdown-it"
+
+const md = new MarkdownIt()
 
 const api = import.meta.env.DEV ? "http://localhost:8787" : "";
 
@@ -122,10 +125,12 @@ const newPaste = () => {
 }
 
 // On mounted hook to check for paste key and lang
-onMounted(() => {
+const bootstrap = async () => {
   const [id, lang] = parseID();
-  if (id) loadPaste(id, lang);
-});
+  if (id) await loadPaste(id, lang);
+}
+
+bootstrap();
 
 // Line Numbers helper
 const lineCount = computed(() => {
@@ -158,18 +163,21 @@ const showHint = (key: string, show: boolean) => {
       hintText.value = "Control or Command + shift + r";
       break;
   }
-
 }
+
+const about = computed(() => md.render(paste_text.value))
 </script>
 
 <template>
   <div class="h-full w-full relative">
     <!-- Top Header Box -->
     <div class="header fixed top-0 right-0">
-      <div class="logo-box flex items-center gap-2 justify-center">
-        <img alt="icon" style="width: 20px;" src="/paste.svg" />
-        <h1 class="font-bold text-lg text-white">PasteBox</h1>
-      </div>
+      <a href="/about.md">
+        <div class="logo-box flex items-center gap-2 justify-center">
+          <img alt="icon" style="width: 20px;" src="/paste.svg" />
+          <h1 class="font-bold text-lg text-white">PasteBox</h1>
+        </div>
+      </a>
 
       <!-- Buttons -->
       <div class="btn-box">
@@ -210,7 +218,7 @@ const showHint = (key: string, show: boolean) => {
     </div>
 
     <!-- Paste Area -->
-    <pre v-if="currentPasteId != ''" id="codebox"><code id="paste" :class="currentLang">{{ paste_text }}</code></pre>
+    <pre v-if="currentPasteId != ''" id="codebox"><div id="paste"  v-if="currentPasteId == 'about'" v-html="about" /><code id="paste" v-if="currentPasteId != 'about'" :class="currentLang">{{ paste_text }}</code></pre>
     <textarea v-model="paste_text" v-if="currentPasteId == ''"></textarea>
   </div>
 </template>
