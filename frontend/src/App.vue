@@ -4,8 +4,11 @@ import hljs from "highlight.js";
 import "highlight.js/styles/atom-one-dark.css";
 import MarkdownIt from "markdown-it"
 import hotkeys from "hotkeys-js";
+import {useToast} from 'vue-toast-notification';
+import 'vue-toast-notification/dist/theme-default.css';
 
 const md = new MarkdownIt()
+const toast = useToast();
 
 const api = import.meta.env.DEV ? "http://localhost:8787" : "";
 
@@ -58,16 +61,33 @@ const addPaste = async () => {
         window.history.pushState({}, "", `/${key}${langSuffix}`);
       }
 
+      toast.success("Paste Saved Successfully!", {
+        position: "bottom-right",
+        duration: 2000,
+        dismissible: true,
+        pauseOnHover: true,
+      });
+
       // Activate code highlight
       await nextTick(() => {
         const el = document.getElementById("paste");
         if (el) hljs.highlightElement(el);
       });
     } else {
-      alert(json)
+      toast.error(`Failed to add paste: ${json}`, {
+        position: "bottom-right",
+        duration: 5000,
+        dismissible: true,
+        pauseOnHover: true,
+      });
     }
   } catch (err) {
-    alert(err);
+    toast.error(`Failed to add paste: ${err}`, {
+      position: "bottom-right",
+      duration: 5000,
+      dismissible: true,
+      pauseOnHover: true,
+    });
   }
 };
 
@@ -94,15 +114,34 @@ const loadPaste = async (id: string, lang: string | null) => {
         }
       }
 
+      toast.success(`Paste loaded successfully!`, {
+        position: "bottom-right",
+        duration: 2000,
+        dismissible: true,
+        pauseOnHover: true,
+      });
+
       // Activate code highlight
       await nextTick(() => {
         const el = document.getElementById("paste");
         if (el) hljs.highlightElement(el);
       });
     } else {
+      toast.error(`Paste not found`, {
+        position: "bottom-right",
+        duration: 5000,
+        dismissible: true,
+        pauseOnHover: true,
+      });
       paste_text.value = "Paste not found";
     }
   } catch (err) {
+    toast.error(`Paste not found`, {
+      position: "bottom-right",
+      duration: 5000,
+      dismissible: true,
+      pauseOnHover: true,
+    });
     paste_text.value = "Paste not found";
   }
 };
