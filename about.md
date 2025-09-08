@@ -1,10 +1,10 @@
 # PasteBox
 
-A simple, modern almost drop-in replacement for Hastebin. This was made quickly as a drop-in for us, since the original hastebin repo that we used, disappeared from GitHub.
+A simple, modern almost drop-in replacement for Hastebin. This was made quickly as a drop-in for us, since the original hastebin repo that we used disappeared from GitHub.
 
 Most of the config options remain exactly the same, as do the API endpoints. However, there are some feature differences.
 
-The frontend is written in Vue, with TailwindCSS. The backend is powered by GO
+The frontend is written in Vue, with TailwindCSS. GO powers the backend
 
 Source Code: https://github.com/firstdarkdev/pastebox/
 
@@ -17,10 +17,11 @@ Source Code: https://github.com/firstdarkdev/pastebox/
 - [X] Document Pasting
 - [X] Document Copying
 - [X] Raw Document Viewing
+- [X] Shortcut Keys
 
 ### Storage Backends:
 
-- [X] File Based Storage
+- [X] File-Based Storage
 - [ ] S3 Storage
 - [ ] Google Data-Store
 - [ ] Memcached

@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import {computed, nextTick, ref} from "vue";
+import {computed, nextTick, onBeforeUnmount, onMounted, ref} from "vue";
 import hljs from "highlight.js";
 import "highlight.js/styles/atom-one-dark.css";
 import MarkdownIt from "markdown-it"
+import hotkeys from "hotkeys-js";
 
 const md = new MarkdownIt()
 
@@ -150,7 +151,7 @@ const showHint = (key: string, show: boolean) => {
 
     case "new":
       hintTitle.value = "New";
-      hintText.value = "Control or Command + n";
+      hintText.value = "Control or Command + shift + n";
       break;
 
     case "duplicate":
@@ -166,6 +167,43 @@ const showHint = (key: string, show: boolean) => {
 }
 
 const about = computed(() => md.render(paste_text.value))
+
+hotkeys.filter = () => true
+
+onMounted(() => {
+  hotkeys("ctrl+s, command+s", (e) => {
+    e.preventDefault();
+    if (paste_text.value.length > 0) {
+      addPaste();
+    }
+  })
+
+  hotkeys("ctrl+shift+n, command+shift+n", (e) => {
+    e.preventDefault();
+    newPaste();
+  })
+
+  hotkeys("ctrl+d, command+d", (e) => {
+    e.preventDefault();
+    if (paste_text.value.length > 0) {
+      duplicateAndEdit();
+    }
+  })
+
+  hotkeys("ctrl+shift+r, command+shift+r", (e) => {
+    e.preventDefault();
+    if (paste_text.value.length > 0) {
+      viewRaw();
+    }
+  })
+})
+
+onBeforeUnmount(() => {
+  hotkeys.unbind("ctrl+s, command+s");
+  hotkeys.unbind("ctrl+n, command+n");
+  hotkeys.unbind("ctrl+d, command+d");
+  hotkeys.unbind("ctrl+shift+r, command+shift+r");
+})
 </script>
 
 <template>
