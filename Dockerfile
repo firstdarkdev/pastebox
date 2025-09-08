@@ -16,6 +16,7 @@ FROM alpine:latest
 WORKDIR /app
 COPY --from=backend /app/server .
 COPY --from=backend /app/web/dist ./web/dist
+COPY about.md .
 RUN chmod +x ./server
 
 CMD ["./server"]
