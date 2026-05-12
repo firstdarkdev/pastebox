@@ -1,12 +1,13 @@
 package http
 
 import (
-	"github.com/gofiber/fiber/v2"
-	log "github.com/sirupsen/logrus"
 	"haste/config"
 	"haste/utils"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/gofiber/fiber/v2"
+	log "github.com/sirupsen/logrus"
 )
 
 // DocumentsRoute Main HTTP handler for documents
@@ -28,7 +29,7 @@ func DocumentsRoute(router fiber.Router, config config.RuntimeConfig) {
 		}
 
 		// Length check
-		if len(content) > config.Conf.MaxLength {
+		if config.Conf.MaxLength != -1 && len(content) > config.Conf.MaxLength {
 			log.Error("Document too large")
 			return ctx.Status(fiber.StatusBadRequest).SendString("Document too large")
 		}
