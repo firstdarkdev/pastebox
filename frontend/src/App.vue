@@ -155,6 +155,7 @@ const highlightText = () => {
   const el = document.getElementById("paste");
 
   if (el) {
+    // @ts-ignore
     highlightElement(el, currentLang.value, 'multiline', {
       hideLineNumbers: false
     })
