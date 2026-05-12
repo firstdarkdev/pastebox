@@ -9,8 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@speed-highlight/core": "^1.2.15",
     "@tailwindcss/vite": "^4.1.13",
-    "highlight.js": "^11.11.1",
     "hotkeys-js": "^3.13.15",
     "markdown-it": "^14.1.0",
     "tailwindcss": "^4.1.13",
