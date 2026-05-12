@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import {computed, nextTick, onBeforeUnmount, onMounted, ref} from "vue";
-import hljs from "highlight.js";
-import "highlight.js/styles/atom-one-dark.css";
 import MarkdownIt from "markdown-it"
 import hotkeys from "hotkeys-js";
 import {useToast} from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-default.css';
+import { detectLanguage } from "@speed-highlight/core/detect";
+import {highlightElement} from "@speed-highlight/core";
 
 const md = new MarkdownIt()
 const toast = useToast();
 
-const api = import.meta.env.DEV ? "http://localhost:8787" : "";
+const api = import.meta.env.DEV ? "https://paste.firstdark.dev" : "";
 
 // Paste Controls
 const paste_text = ref<string>("");
@@ -51,12 +51,12 @@ const addPaste = async () => {
       const langSuffix = currentLang.value ? `.${currentLang.value}` : "";
       currentPasteId.value = key;
 
-      const detected = hljs.highlightAuto(paste_text.value);
-      currentLang.value = detected.language || "";
+      const detected = detectLanguage(paste_text.value);
+      currentLang.value = detected || "";
 
       // Update the URL
-      if (detected.language) {
-        window.history.pushState({}, "", `/${key}.${detected.language}`);
+      if (detected) {
+        window.history.pushState({}, "", `/${key}.${detected}`);
       } else {
         window.history.pushState({}, "", `/${key}${langSuffix}`);
       }
@@ -70,8 +70,7 @@ const addPaste = async () => {
 
       // Activate code highlight
       await nextTick(() => {
-        const el = document.getElementById("paste");
-        if (el) hljs.highlightElement(el);
+        highlightText()
       });
     } else {
       toast.error(`Failed to add paste: ${json}`, {
@@ -94,6 +93,13 @@ const addPaste = async () => {
 // Try to load an existing text from the server
 const loadPaste = async (id: string, lang: string | null) => {
   try {
+    toast.info('Loading Paste', {
+      position: 'bottom-right',
+      duration: 2000,
+      dismissible: true,
+      pauseOnHover: true
+    })
+
     const res = await fetch(`${api}/documents/${id}`);
     if (res.ok) {
       const json = await res.json();
@@ -105,12 +111,12 @@ const loadPaste = async (id: string, lang: string | null) => {
         currentLang.value = lang;
       } else {
         // Try to auto-detect language
-        const detected = hljs.highlightAuto(json.data);
-        currentLang.value = detected.language || "";
+        const detected = detectLanguage(json.data);
+        currentLang.value = detected || "";
 
         // Update the URL
-        if (detected.language) {
-          window.history.pushState({}, "", `/${id}.${detected.language}`);
+        if (detected) {
+          window.history.pushState({}, "", `/${id}.${detected}`);
         }
       }
 
@@ -123,8 +129,7 @@ const loadPaste = async (id: string, lang: string | null) => {
 
       // Activate code highlight
       await nextTick(() => {
-        const el = document.getElementById("paste");
-        if (el) hljs.highlightElement(el);
+        highlightText()
       });
     } else {
       toast.error(`Paste not found`, {
@@ -145,6 +150,16 @@ const loadPaste = async (id: string, lang: string | null) => {
     paste_text.value = "Paste not found";
   }
 };
+
+const highlightText = () => {
+  const el = document.getElementById("paste");
+
+  if (el) {
+    highlightElement(el, currentLang.value, 'multiline', {
+      hideLineNumbers: false
+    })
+  }
+}
 
 // Handler to redirect to raw paste
 const viewRaw = () => {
@@ -171,12 +186,6 @@ const bootstrap = async () => {
 }
 
 bootstrap();
-
-// Line Numbers helper
-const lineCount = computed(() => {
-  if (!paste_text.value || currentPasteId.value == "") return 0;
-  return paste_text.value.split("\n").length;
-});
 
 // Button Hint helper
 const showHint = (key: string, show: boolean) => {
@@ -288,14 +297,13 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <!-- Line Numbers -->
+    <!-- New Line Holder -->
     <div class="line-numbers">
       <p v-if="currentPasteId == ''">></p>
-      <div v-for="n in lineCount" :key="n">{{ n }}<br></div>
     </div>
 
     <!-- Paste Area -->
-    <pre v-if="currentPasteId != ''" id="codebox"><div id="paste"  v-if="currentPasteId == 'about'" v-html="about" /><code id="paste" v-if="currentPasteId != 'about'" :class="currentLang">{{ paste_text }}</code></pre>
+    <pre v-if="currentPasteId != ''" id="codebox" :class="currentPasteId != '' ? 'nopadding' : ''"><div id="paste"  v-if="currentPasteId == 'about'" v-html="about" /><code id="paste" v-if="currentPasteId != 'about'" :class="currentLang">{{ paste_text }}</code></pre>
     <textarea v-model="paste_text" v-if="currentPasteId == ''"></textarea>
   </div>
 </template>
